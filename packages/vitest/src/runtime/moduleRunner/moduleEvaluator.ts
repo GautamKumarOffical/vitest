@@ -482,12 +482,20 @@ export function createImportMetaEnvProxy(): ModuleRunnerImportMeta['env'] {
         return true
       }
 
-      if (booleanKeys.includes(key)) {
+      if (value === undefined) {
+        delete process.env[key]
+      } else if (booleanKeys.includes(key)) {
         process.env[key] = value ? '1' : ''
       } else {
         process.env[key] = value
       }
 
+      return true
+    },
+    deleteProperty(_, key) {
+      if (typeof key === 'string') {
+        delete process.env[key]
+      }
       return true
     },
   }) as ModuleRunnerImportMeta['env']

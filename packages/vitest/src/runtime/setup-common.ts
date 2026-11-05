@@ -30,7 +30,11 @@ function setupDefines(config: SerializedConfig) {
 
 export function setupEnv(env: Record<string, any>, metaEnv: Record<string, any>): void {
   for (const key in env) {
-    metaEnv[key] = env[key]
+    if (env[key] === undefined) {
+      delete metaEnv[key]
+    } else {
+      metaEnv[key] = env[key]
+    }
   }
 }
 

@@ -110,6 +110,17 @@ export function createPool(ctx: Vitest): ProcessPool {
             ...project.config.env,
           }
 
+          for (const key in ctx.config.env) {
+            if (ctx.config.env[key] === undefined) {
+              delete env[key]
+            }
+          }
+          for (const key in project.config.env) {
+            if (project.config.env[key] === undefined) {
+              delete env[key]
+            }
+          }
+
           // V8 serializes compile-cached scripts without the source positions
           // that precise coverage relies on, so the compile cache must stay off
           // for the v8 provider (and custom providers, whose mechanism we can't

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { setupEnv } from '../../../packages/vitest/src/runtime/setup-common'
 
 declare global {
   var __defined__: unknown
@@ -142,5 +143,44 @@ describe('stubbing envs', () => {
     vi.unstubAllEnvs()
     expect(import.meta.env.VITE_TEST_UPDATE_ENV).toBe('development')
     expect(process.env.VITE_TEST_UPDATE_ENV).toBe('development')
+  })
+
+  it('setting undefined unsets the env instead of stringifying to "undefined"', () => {
+    process.env.TEST_UNDEFINED_SET = 'initial'
+    import.meta.env.TEST_UNDEFINED_SET = undefined
+    expect('TEST_UNDEFINED_SET' in process.env).toBe(false)
+    expect(process.env.TEST_UNDEFINED_SET).toBeUndefined()
+    expect(import.meta.env.TEST_UNDEFINED_SET).toBeUndefined()
+  })
+
+  it('deleting property unsets the env', () => {
+    process.env.TEST_DELETE_PROP = 'initial'
+    delete import.meta.env.TEST_DELETE_PROP
+    expect('TEST_DELETE_PROP' in process.env).toBe(false)
+    expect(process.env.TEST_DELETE_PROP).toBeUndefined()
+    expect(import.meta.env.TEST_DELETE_PROP).toBeUndefined()
+  })
+
+  it('setupEnv unsets undefined values without stringifying to "undefined"', () => {
+    process.env.TEST_EXISTING_ENV = 'initial'
+    setupEnv(
+      {
+        TEST_UNDEFINED_KEY: undefined,
+        TEST_DEFINED_KEY: 'defined',
+        TEST_EXISTING_ENV: undefined,
+      },
+      import.meta.env,
+    )
+
+    expect('TEST_UNDEFINED_KEY' in process.env).toBe(false)
+    expect(process.env.TEST_UNDEFINED_KEY).toBeUndefined()
+    expect(import.meta.env.TEST_UNDEFINED_KEY).toBeUndefined()
+
+    expect(process.env.TEST_DEFINED_KEY).toBe('defined')
+    expect(import.meta.env.TEST_DEFINED_KEY).toBe('defined')
+
+    expect('TEST_EXISTING_ENV' in process.env).toBe(false)
+    expect(process.env.TEST_EXISTING_ENV).toBeUndefined()
+    expect(import.meta.env.TEST_EXISTING_ENV).toBeUndefined()
   })
 })
